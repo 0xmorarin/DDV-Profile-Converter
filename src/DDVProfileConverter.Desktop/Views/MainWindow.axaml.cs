@@ -102,7 +102,7 @@ public partial class MainWindow : Window
 
         var items =
             e.DataTransfer
-                .GetFiles()?
+                .TryGetFiles()?
                 .ToArray();
 
         if (items is not { Length: 1 } ||
