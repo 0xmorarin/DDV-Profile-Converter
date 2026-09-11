@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/DDVProfileConverter.Core/DDVProfileConverter.Core.csproj" />
+  <Project Path="src/DDVProfileConverter.Desktop/DDVProfileConverter.Desktop.csproj" />
+</Solution>
