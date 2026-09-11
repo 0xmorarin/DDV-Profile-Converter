@@ -26,3 +26,5 @@ jobs:
           dotnet-version: 10.0.x
 
       - run: dotnet build DDVProfileConverter.slnx --configuration Release
+
+      - run: dotnet test DDVProfileConverter.slnx --configuration Release --no-build
