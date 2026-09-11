@@ -8,6 +8,18 @@ namespace DDVProfileConverter.Tests;
 public sealed class ProfileCryptoTests
 {
     [TestMethod]
+    public void EncryptAndDecryptRoundTrip()
+    {
+        var archive = TestProfileFactory.CreateArchive(
+            ("profile", TestProfileFactory.CreateJson()));
+
+        var encrypted = ProfileCrypto.Encrypt(archive);
+        var decrypted = ProfileCrypto.Decrypt(encrypted);
+
+        CollectionAssert.AreEqual(archive, decrypted);
+    }
+
+    [TestMethod]
     public void DecryptRestoresOriginalArchive()
     {
         var archive = TestProfileFactory.CreateArchive(
@@ -18,6 +30,13 @@ public sealed class ProfileCryptoTests
         var decrypted = ProfileCrypto.Decrypt(encrypted);
 
         CollectionAssert.AreEqual(archive, decrypted);
+    }
+
+    [TestMethod]
+    public void EncryptRejectsEmptyInput()
+    {
+        Assert.ThrowsExactly<CryptographicException>(
+            () => ProfileCrypto.Encrypt(Array.Empty<byte>()));
     }
 
     [TestMethod]
