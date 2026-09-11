@@ -2,127 +2,90 @@
     x:Class="DDVProfileConverter.Desktop.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Width="720"
-    Height="580"
-    MinWidth="560"
-    MinHeight="500"
-    Title="DDV Profile Converter">
-  <Grid
-      Margin="32"
-      RowDefinitions="Auto,20,Auto,16,Auto,*">
-    <StackPanel
-        Grid.Row="0"
-        Spacing="6">
-      <TextBlock
-          FontSize="26"
-          FontWeight="SemiBold"
-          Text="DDV Profile Converter" />
-      <TextBlock
-          Opacity="0.72"
-          Text="Decrypts encrypted profile.json files and re-encrypts readable JSON automatically."
-          TextWrapping="Wrap" />
-    </StackPanel>
-
-    <Border
-        x:Name="DropZone"
-        Grid.Row="2"
-        Padding="28"
-        BorderBrush="Gray"
-        BorderThickness="1"
-        CornerRadius="10"
-        DragDrop.AllowDrop="True">
+    Width="560"
+    Height="380"
+    MinWidth="460"
+    MinHeight="320"
+    Title="DDV Profile Converter"
+    DragDrop.AllowDrop="True">
+  <Grid Margin="24">
+    <Grid RowDefinitions="*,Auto,Auto">
       <StackPanel
+          Grid.Row="0"
           HorizontalAlignment="Center"
-          Spacing="12">
+          VerticalAlignment="Center"
+          Spacing="14">
         <TextBlock
             HorizontalAlignment="Center"
-            FontSize="18"
+            FontSize="22"
             FontWeight="SemiBold"
             Text="Drop profile.json here" />
+
         <TextBlock
             HorizontalAlignment="Center"
-            Opacity="0.7"
-            Text="or choose a file" />
+            Opacity="0.65"
+            Text="or" />
+
         <Button
             x:Name="ChooseFileButton"
-            Width="140"
+            Width="130"
             HorizontalAlignment="Center"
             Click="OnChooseFileClick"
             Content="Choose File" />
+      </StackPanel>
+
+      <TextBlock
+          x:Name="StatusText"
+          Grid.Row="1"
+          Margin="0,0,0,8"
+          HorizontalAlignment="Center"
+          Opacity="0.8"
+          Text="Ready."
+          TextWrapping="Wrap" />
+
+      <Grid
+          x:Name="DetailsPanel"
+          Grid.Row="2"
+          ColumnDefinitions="90,*"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+          IsVisible="False">
+        <TextBlock Grid.Row="0" Text="Result" />
         <TextBlock
-            MaxWidth="520"
-            HorizontalAlignment="Center"
-            Opacity="0.65"
-            Text="Encrypted input is backed up before it is replaced. Plain JSON is encrypted without creating a new backup."
-            TextAlignment="Center"
+            x:Name="DirectionValue"
+            Grid.Row="0"
+            Grid.Column="1" />
+
+        <TextBlock Grid.Row="1" Text="Player" />
+        <TextBlock
+            x:Name="PlayerValue"
+            Grid.Row="1"
+            Grid.Column="1" />
+
+        <TextBlock Grid.Row="2" Text="Version" />
+        <TextBlock
+            x:Name="VersionValue"
+            Grid.Row="2"
+            Grid.Column="1" />
+
+        <TextBlock Grid.Row="3" Text="MDC" />
+        <TextBlock
+            x:Name="MdcValue"
+            Grid.Row="3"
+            Grid.Column="1" />
+
+        <TextBlock Grid.Row="4" Text="Modified" />
+        <TextBlock
+            x:Name="ModifiedValue"
+            Grid.Row="4"
+            Grid.Column="1" />
+
+        <TextBlock Grid.Row="5" Text="Backup" />
+        <TextBlock
+            x:Name="BackupValue"
+            Grid.Row="5"
+            Grid.Column="1"
             TextWrapping="Wrap" />
-      </StackPanel>
-    </Border>
-
-    <TextBlock
-        x:Name="StatusText"
-        Grid.Row="4"
-        Text="Ready."
-        TextWrapping="Wrap" />
-
-    <Border
-        x:Name="DetailsPanel"
-        Grid.Row="5"
-        Margin="0,16,0,0"
-        Padding="16"
-        BorderBrush="Gray"
-        BorderThickness="1"
-        CornerRadius="8"
-        IsVisible="False">
-      <StackPanel Spacing="8">
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="Result" />
-          <TextBlock
-              x:Name="DirectionValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="Player" />
-          <TextBlock
-              x:Name="PlayerValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="Version" />
-          <TextBlock
-              x:Name="VersionValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="MDC" />
-          <TextBlock
-              x:Name="MdcValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="Modified" />
-          <TextBlock
-              x:Name="ModifiedValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-
-        <Grid ColumnDefinitions="120,*">
-          <TextBlock FontWeight="SemiBold" Text="Backup" />
-          <TextBlock
-              x:Name="BackupValue"
-              Grid.Column="1"
-              TextWrapping="Wrap" />
-        </Grid>
-      </StackPanel>
-    </Border>
+      </Grid>
+    </Grid>
   </Grid>
 </Window>
