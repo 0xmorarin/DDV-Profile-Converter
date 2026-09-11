@@ -1,0 +1,29 @@
+name: Portable Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - run: dotnet test DDVProfileConverter.slnx --configuration Release
+
+      - run: dotnet publish src/DDVProfileConverter.Desktop/DDVProfileConverter.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --output artifacts/win-x64 -p:UseAppHost=true -p:PublishSingleFile=false -p:DebugType=None -p:DebugSymbols=false
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DDV-Profile-Converter-win-x64
+          path: artifacts/win-x64
+          if-no-files-found: error
+          retention-days: 14
