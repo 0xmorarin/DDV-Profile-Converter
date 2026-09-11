@@ -15,11 +15,11 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         DragDrop.AddDragOverHandler(
-            DropZone,
+            this,
             OnDragOver);
 
         DragDrop.AddDropHandler(
-            DropZone,
+            this,
             OnDrop);
     }
 
