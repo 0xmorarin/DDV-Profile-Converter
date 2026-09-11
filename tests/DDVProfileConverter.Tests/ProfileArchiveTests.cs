@@ -8,6 +8,20 @@ namespace DDVProfileConverter.Tests;
 public sealed class ProfileArchiveTests
 {
     [TestMethod]
+    public void CreateProfileArchiveRoundTrips()
+    {
+        var expected = TestProfileFactory.CreateJson();
+
+        var archive =
+            ProfileArchive.CreateProfileArchive(expected);
+
+        var actual =
+            ProfileArchive.ExtractProfile(archive);
+
+        CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
     public void ExtractProfileReturnsExpectedBytes()
     {
         var expected = TestProfileFactory.CreateJson();
