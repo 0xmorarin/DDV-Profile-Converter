@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,12 +11,17 @@ namespace DDVProfileConverter.Desktop.Views;
 
 public partial class MainWindow : Window
 {
+    private const double CompactHeight = 430;
+    private const double EncryptedSuccessHeight = 600;
+    private const double DecryptedSuccessHeight = 700;
+
     private static readonly string BackupDirectory =
         Path.Combine(
             AppContext.BaseDirectory,
             "backups");
 
     private bool _isBusy;
+    private string? _currentBackupDirectory;
 
     public MainWindow()
     {
@@ -84,6 +90,34 @@ public partial class MainWindow : Window
 
         await ProcessFileAsync(
             file.Path.LocalPath);
+    }
+
+    private void OnOpenBackupFolderClick(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        BackupOpenErrorText.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(_currentBackupDirectory) ||
+            !Directory.Exists(_currentBackupDirectory))
+        {
+            BackupOpenErrorText.IsVisible = true;
+            return;
+        }
+
+        try
+        {
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = _currentBackupDirectory,
+                    UseShellExecute = true
+                });
+        }
+        catch
+        {
+            BackupOpenErrorText.IsVisible = true;
+        }
     }
 
     private void OnDragOver(
@@ -159,6 +193,9 @@ public partial class MainWindow : Window
 
     private void ShowProcessing(string path)
     {
+        Height = CompactHeight;
+        _currentBackupDirectory = null;
+
         ProcessingFileText.Text =
             $"Converting {Path.GetFileName(path)}";
 
@@ -168,10 +205,43 @@ public partial class MainWindow : Window
     private void ShowSuccess(
         ProfileConversionResult result)
     {
+        var decrypted =
+            result.OutputFormat == ProfileFormat.PlainJson;
+
         SuccessTitleText.Text =
-            result.OutputFormat == ProfileFormat.PlainJson
-                ? "Decrypted successfully"
-                : "Encrypted successfully";
+            decrypted
+                ? "DECRYPTED"
+                : "ENCRYPTED";
+
+        SuccessSubtitleText.Text =
+            decrypted
+                ? "Profile decrypted successfully."
+                : "Profile encrypted successfully.";
+
+        if (result.Backup is not null)
+        {
+            _currentBackupDirectory =
+                Path.GetDirectoryName(result.Backup.Path) ??
+                BackupDirectory;
+
+            BackupStatusText.Text =
+                result.Backup.Created
+                    ? "Backup created"
+                    : "Backup already exists";
+
+            BackupDirectoryValue.Text =
+                _currentBackupDirectory;
+
+            BackupOpenErrorText.IsVisible = false;
+            BackupSection.IsVisible = true;
+            Height = DecryptedSuccessHeight;
+        }
+        else
+        {
+            _currentBackupDirectory = null;
+            BackupSection.IsVisible = false;
+            Height = EncryptedSuccessHeight;
+        }
 
         var metadata = result.Metadata;
 
@@ -202,6 +272,9 @@ public partial class MainWindow : Window
 
     private void ShowError(string message)
     {
+        Height = CompactHeight;
+        _currentBackupDirectory = null;
+
         ErrorMessageText.Text =
             string.IsNullOrWhiteSpace(message)
                 ? "The selected file could not be converted."

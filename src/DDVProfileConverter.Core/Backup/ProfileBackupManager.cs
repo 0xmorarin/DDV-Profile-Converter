@@ -1,4 +1,7 @@
 using System.Security.Cryptography;
+using System.Text.Json;
+using DDVProfileConverter.Core.Archive;
+using DDVProfileConverter.Core.Crypto;
 using DDVProfileConverter.Core.Profile;
 
 namespace DDVProfileConverter.Core.Backup;
@@ -8,6 +11,7 @@ public static class ProfileBackupManager
     public static ProfileBackupResult Create(
         string backupDirectoryPath,
         ReadOnlySpan<byte> originalEncryptedBytes,
+        ReadOnlySpan<byte> profileJsonBytes,
         ProfileMetadata metadata)
     {
         if (string.IsNullOrWhiteSpace(backupDirectoryPath))
@@ -23,6 +27,12 @@ public static class ProfileBackupManager
                 "The original encrypted profile is empty.");
         }
 
+        if (profileJsonBytes.IsEmpty)
+        {
+            throw new InvalidDataException(
+                "The decrypted profile JSON is empty.");
+        }
+
         ArgumentNullException.ThrowIfNull(metadata);
 
         var canonicalFileName =
@@ -35,6 +45,10 @@ public static class ProfileBackupManager
 
         var sourceHash =
             SHA256.HashData(originalEncryptedBytes);
+
+        var normalizedJsonHash =
+            SHA256.HashData(
+                ProfileJson.Minify(profileJsonBytes));
 
         for (var suffix = 1; ; suffix++)
         {
@@ -53,7 +67,10 @@ public static class ProfileBackupManager
                 if (FileMatches(
                         destinationPath,
                         originalEncryptedBytes.Length,
-                        sourceHash))
+                        sourceHash) ||
+                    ProfileContentMatches(
+                        destinationPath,
+                        normalizedJsonHash))
                 {
                     return new ProfileBackupResult(
                         destinationPath,
@@ -90,7 +107,10 @@ public static class ProfileBackupManager
                     if (FileMatches(
                             destinationPath,
                             originalEncryptedBytes.Length,
-                            sourceHash))
+                            sourceHash) ||
+                        ProfileContentMatches(
+                            destinationPath,
+                            normalizedJsonHash))
                     {
                         return new ProfileBackupResult(
                             destinationPath,
@@ -156,5 +176,41 @@ public static class ProfileBackupManager
         return actualHash
             .AsSpan()
             .SequenceEqual(expectedHash);
+    }
+
+    private static bool ProfileContentMatches(
+        string path,
+        ReadOnlySpan<byte> expectedHash)
+    {
+        try
+        {
+            var encryptedBytes =
+                File.ReadAllBytes(path);
+
+            var archiveBytes =
+                ProfileCrypto.Decrypt(encryptedBytes);
+
+            var jsonBytes =
+                ProfileArchive.ExtractProfile(archiveBytes);
+
+            var normalizedJson =
+                ProfileJson.Minify(jsonBytes);
+
+            var actualHash =
+                SHA256.HashData(normalizedJson);
+
+            return actualHash
+                .AsSpan()
+                .SequenceEqual(expectedHash);
+        }
+        catch (Exception exception) when (
+            exception is CryptographicException or
+            InvalidDataException or
+            JsonException or
+            IOException or
+            UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 }

@@ -202,6 +202,87 @@ public sealed class ProfileFileConverterTests
     }
 
     [TestMethod]
+    public void ConvertInPlaceDoesNotDuplicateBackupAfterReencryptingSameProfile()
+    {
+        using var directory =
+            new TemporaryDirectory();
+
+        var profilePath =
+            Path.Combine(
+                directory.Path,
+                "profile.json");
+
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
+        var compactJson =
+            TestProfileFactory.CreateJson();
+
+        var prettyJson =
+            ProfileJson.PrettyPrint(compactJson);
+
+        var originalEncrypted =
+            TestProfileFactory.Encrypt(
+                TestProfileFactory.CreateArchive(
+                    ("profile", prettyJson)));
+
+        File.WriteAllBytes(
+            profilePath,
+            originalEncrypted);
+
+        var first =
+            ProfileFileConverter.ConvertInPlace(
+                profilePath,
+                backupDirectory);
+
+        Assert.IsNotNull(first.Backup);
+        Assert.IsTrue(first.Backup!.Created);
+
+        var second =
+            ProfileFileConverter.ConvertInPlace(
+                profilePath,
+                backupDirectory);
+
+        Assert.AreEqual(
+            ProfileFormat.Encrypted,
+            second.OutputFormat);
+
+        var reencrypted =
+            File.ReadAllBytes(profilePath);
+
+        Assert.IsFalse(
+            originalEncrypted
+                .AsSpan()
+                .SequenceEqual(reencrypted));
+
+        var third =
+            ProfileFileConverter.ConvertInPlace(
+                profilePath,
+                backupDirectory);
+
+        Assert.IsNotNull(third.Backup);
+        Assert.IsFalse(third.Backup!.Created);
+
+        Assert.AreEqual(
+            first.Backup.Path,
+            third.Backup.Path);
+
+        CollectionAssert.AreEqual(
+            originalEncrypted,
+            File.ReadAllBytes(first.Backup.Path));
+
+        Assert.AreEqual(
+            1,
+            Directory.GetFiles(
+                backupDirectory,
+                "*.profile.bak")
+            .Length);
+    }
+
+    [TestMethod]
     public void ConvertInPlaceRejectsInvalidInputWithoutModification()
     {
         using var directory =

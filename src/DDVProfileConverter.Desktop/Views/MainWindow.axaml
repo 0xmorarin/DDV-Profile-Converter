@@ -131,11 +131,11 @@
 
       <StackPanel
           x:Name="SuccessPanel"
-          Width="450"
+          Width="470"
           HorizontalAlignment="Center"
           VerticalAlignment="Center"
           IsVisible="False"
-          Spacing="10">
+          Spacing="9">
         <TextBlock
             HorizontalAlignment="Center"
             FontSize="28"
@@ -143,77 +143,162 @@
             Text="✦" />
         <TextBlock
             x:Name="SuccessTitleText"
-            Margin="0,0,0,6"
             HorizontalAlignment="Center"
-            FontSize="23"
-            FontWeight="SemiBold"
+            FontSize="26"
+            FontWeight="Bold"
             Foreground="{StaticResource GoldBrightBrush}"
-            Text="Decrypted successfully" />
-
-        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
-          <TextBlock Classes="Label" Margin="0,3" Text="Player Name" />
-          <TextBlock
-              x:Name="PlayerNameValue"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3"
-              TextWrapping="Wrap" />
-
-          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Player ID" />
-          <TextBlock
-              x:Name="PlayerIdValue"
-              Grid.Row="1"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3"
-              TextWrapping="Wrap" />
-        </Grid>
+            Text="DECRYPTED" />
+        <TextBlock
+            x:Name="SuccessSubtitleText"
+            Classes="Secondary"
+            Margin="0,0,0,4"
+            HorizontalAlignment="Center"
+            FontSize="14"
+            Text="Profile decrypted successfully." />
 
         <Border Height="1" Background="{StaticResource DividerBrush}" />
 
-        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
-          <TextBlock Classes="Label" Margin="0,3" Text="Save Version" />
-          <TextBlock
-              x:Name="SaveVersionValue"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3" />
+        <StackPanel
+            x:Name="BackupSection"
+            IsVisible="False"
+            Spacing="8">
+          <StackPanel
+              HorizontalAlignment="Center"
+              Orientation="Horizontal"
+              Spacing="10">
+            <Border
+                Width="28"
+                Height="28"
+                BorderBrush="{StaticResource GoldBrush}"
+                BorderThickness="1.5"
+                CornerRadius="14">
+              <TextBlock
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  FontSize="16"
+                  Foreground="{StaticResource GoldBrightBrush}"
+                  Text="✓" />
+            </Border>
+            <TextBlock
+                x:Name="BackupStatusText"
+                VerticalAlignment="Center"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Text="Backup created" />
+          </StackPanel>
 
-          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Play Time" />
-          <TextBlock
-              x:Name="PlayTimeValue"
-              Grid.Row="1"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3" />
-        </Grid>
+          <Button
+              Width="220"
+              Classes="RoyalButton"
+              HorizontalAlignment="Center"
+              Click="OnOpenBackupFolderClick"
+              Content="Open Backup Folder" />
 
-        <Border Height="1" Background="{StaticResource DividerBrush}" />
-
-        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
-          <TextBlock Classes="Label" Margin="0,3" Text="Created" />
           <TextBlock
-              x:Name="CreatedValue"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3" />
+              x:Name="BackupDirectoryValue"
+              Classes="Secondary"
+              MaxWidth="450"
+              HorizontalAlignment="Center"
+              FontSize="12"
+              TextAlignment="Center"
+              TextWrapping="Wrap" />
 
-          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Last Modified" />
           <TextBlock
-              x:Name="LastModifiedValue"
-              Grid.Row="1"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3" />
+              x:Name="BackupOpenErrorText"
+              MaxWidth="450"
+              HorizontalAlignment="Center"
+              FontSize="12"
+              Foreground="{StaticResource ErrorBrush}"
+              IsVisible="False"
+              Text="Could not open the backup folder automatically."
+              TextAlignment="Center"
+              TextWrapping="Wrap" />
 
-          <TextBlock Grid.Row="2" Classes="Label" Margin="0,3" Text="Last Saved On" />
-          <TextBlock
-              x:Name="LastSavedOnValue"
-              Grid.Row="2"
-              Grid.Column="1"
-              Classes="Value"
-              Margin="0,3" />
-        </Grid>
+          <Border
+              Height="1"
+              Margin="0,2,0,0"
+              Background="{StaticResource DividerBrush}" />
+        </StackPanel>
+
+        <StackPanel Spacing="0">
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Player Name" />
+            <TextBlock
+                x:Name="PlayerNameValue"
+                Grid.Column="1"
+                Classes="Value"
+                TextWrapping="Wrap" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Player ID" />
+            <TextBlock
+                x:Name="PlayerIdValue"
+                Grid.Column="1"
+                Classes="Value"
+                TextWrapping="Wrap" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Save Version" />
+            <TextBlock
+                x:Name="SaveVersionValue"
+                Grid.Column="1"
+                Classes="Value" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Play Time" />
+            <TextBlock
+                x:Name="PlayTimeValue"
+                Grid.Column="1"
+                Classes="Value" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Created" />
+            <TextBlock
+                x:Name="CreatedValue"
+                Grid.Column="1"
+                Classes="Value" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Last Modified" />
+            <TextBlock
+                x:Name="LastModifiedValue"
+                Grid.Column="1"
+                Classes="Value" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+          <Grid ColumnDefinitions="170,*" Margin="0,5">
+            <TextBlock Classes="Label" Text="Last Saved On" />
+            <TextBlock
+                x:Name="LastSavedOnValue"
+                Grid.Column="1"
+                Classes="Value" />
+          </Grid>
+          <Border Height="1" Background="{StaticResource DividerBrush}" />
+        </StackPanel>
+
+        <Button
+            Classes="RoyalButton"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Center"
+            Click="OnChooseFileClick"
+            Content="Choose File" />
+
+        <TextBlock
+            Classes="Secondary"
+            HorizontalAlignment="Center"
+            FontSize="12"
+            Text="Drop another profile.json to convert." />
       </StackPanel>
 
       <StackPanel
@@ -257,6 +342,11 @@
             HorizontalAlignment="Center"
             Click="OnChooseFileClick"
             Content="Choose File" />
+        <TextBlock
+            Classes="Secondary"
+            HorizontalAlignment="Center"
+            FontSize="12"
+            Text="Drop another profile.json to try again." />
       </StackPanel>
     </Grid>
   </Border>

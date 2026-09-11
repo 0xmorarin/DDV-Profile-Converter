@@ -48,6 +48,7 @@ public static class ProfileFileDecryptor
             ProfileBackupManager.Create(
                 backupDirectory,
                 originalBytes,
+                readResult.JsonBytes,
                 readResult.Metadata);
 
         VerifiedFileReplacer.Replace(

@@ -1,5 +1,6 @@
 using System.Text;
 using DDVProfileConverter.Core.Backup;
+using DDVProfileConverter.Core.Conversion;
 using DDVProfileConverter.Core.Profile;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,6 +29,7 @@ public sealed class ProfileBackupManagerTests
             ProfileBackupManager.Create(
                 backupDirectory,
                 original,
+                TestProfileFactory.CreateJson(),
                 CreateMetadata());
 
         Assert.IsTrue(result.Created);
@@ -54,6 +56,9 @@ public sealed class ProfileBackupManagerTests
             Encoding.UTF8.GetBytes(
                 "encrypted-original");
 
+        var json =
+            TestProfileFactory.CreateJson();
+
         var metadata =
             CreateMetadata();
 
@@ -61,12 +66,14 @@ public sealed class ProfileBackupManagerTests
             ProfileBackupManager.Create(
                 backupDirectory,
                 original,
+                json,
                 metadata);
 
         var second =
             ProfileBackupManager.Create(
                 backupDirectory,
                 original,
+                json,
                 metadata);
 
         Assert.IsTrue(first.Created);
@@ -78,7 +85,7 @@ public sealed class ProfileBackupManagerTests
     }
 
     [TestMethod]
-    public void CreateUsesSuffixForDifferentBytes()
+    public void CreateDeduplicatesDifferentEncryptedBytesWithSameProfileContent()
     {
         using var directory =
             new TemporaryDirectory();
@@ -89,21 +96,108 @@ public sealed class ProfileBackupManagerTests
                 "application",
                 "backups");
 
+        var compactJson =
+            TestProfileFactory.CreateJson();
+
+        var prettyJson =
+            ProfileJson.PrettyPrint(compactJson);
+
+        var firstEncrypted =
+            TestProfileFactory.Encrypt(
+                TestProfileFactory.CreateArchive(
+                    ("profile", prettyJson)));
+
+        var secondEncrypted =
+            TestProfileFactory.Encrypt(
+                TestProfileFactory.CreateArchive(
+                    ("profile", compactJson)));
+
+        Assert.IsFalse(
+            firstEncrypted
+                .AsSpan()
+                .SequenceEqual(secondEncrypted));
+
         var metadata =
             CreateMetadata();
 
         var first =
             ProfileBackupManager.Create(
                 backupDirectory,
-                Encoding.UTF8.GetBytes(
-                    "encrypted-a"),
+                firstEncrypted,
+                prettyJson,
                 metadata);
 
         var second =
             ProfileBackupManager.Create(
                 backupDirectory,
-                Encoding.UTF8.GetBytes(
-                    "encrypted-b"),
+                secondEncrypted,
+                compactJson,
+                metadata);
+
+        Assert.IsTrue(first.Created);
+        Assert.IsFalse(second.Created);
+
+        Assert.AreEqual(
+            first.Path,
+            second.Path);
+
+        CollectionAssert.AreEqual(
+            firstEncrypted,
+            File.ReadAllBytes(first.Path));
+
+        Assert.AreEqual(
+            1,
+            Directory.GetFiles(
+                backupDirectory,
+                "*.profile.bak")
+            .Length);
+    }
+
+    [TestMethod]
+    public void CreateUsesSuffixForDifferentProfileContent()
+    {
+        using var directory =
+            new TemporaryDirectory();
+
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
+        var firstJson =
+            TestProfileFactory.CreateJson();
+
+        var secondJson =
+            Encoding.UTF8.GetBytes(
+                TestProfileFactory.JsonText.Replace(
+                    "\"Value\":123",
+                    "\"Value\":124",
+                    StringComparison.Ordinal));
+
+        var firstEncrypted =
+            ProfileWriter.Encrypt(firstJson)
+                .EncryptedBytes;
+
+        var secondEncrypted =
+            ProfileWriter.Encrypt(secondJson)
+                .EncryptedBytes;
+
+        var metadata =
+            CreateMetadata();
+
+        var first =
+            ProfileBackupManager.Create(
+                backupDirectory,
+                firstEncrypted,
+                firstJson,
+                metadata);
+
+        var second =
+            ProfileBackupManager.Create(
+                backupDirectory,
+                secondEncrypted,
+                secondJson,
                 metadata);
 
         Assert.IsTrue(first.Created);
@@ -135,6 +229,7 @@ public sealed class ProfileBackupManagerTests
                 backupDirectory,
                 Encoding.UTF8.GetBytes(
                     "encrypted-original"),
+                TestProfileFactory.CreateJson(),
                 CreateMetadata());
 
         Assert.AreEqual(
