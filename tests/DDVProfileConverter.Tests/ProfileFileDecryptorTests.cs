@@ -17,7 +17,17 @@ public sealed class ProfileFileDecryptorTests
         var profilePath =
             Path.Combine(
                 directory.Path,
+                "save",
                 "profile.json");
+
+        Directory.CreateDirectory(
+            Path.GetDirectoryName(profilePath)!);
+
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
 
         var encrypted =
             ProfileWriter.Encrypt(
@@ -30,7 +40,8 @@ public sealed class ProfileFileDecryptorTests
 
         var result =
             ProfileFileDecryptor.DecryptInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         var output =
             File.ReadAllBytes(profilePath);
@@ -49,6 +60,16 @@ public sealed class ProfileFileDecryptorTests
 
         Assert.IsTrue(result.Backup.Created);
 
+        Assert.AreEqual(
+            Path.GetFullPath(backupDirectory),
+            Path.GetDirectoryName(result.Backup.Path));
+
+        Assert.IsFalse(
+            Directory.Exists(
+                Path.Combine(
+                    Path.GetDirectoryName(profilePath)!,
+                    "backups")));
+
         var readResult =
             ProfileReader.Read(output);
 
@@ -60,14 +81,14 @@ public sealed class ProfileFileDecryptorTests
             608,
             result.Metadata.Version);
 
-        var tempFiles =
+        var sourceTempFiles =
             Directory.GetFiles(
-                directory.Path,
+                Path.GetDirectoryName(profilePath)!,
                 ".*.tmp");
 
         Assert.AreEqual(
             0,
-            tempFiles.Length);
+            sourceTempFiles.Length);
     }
 
     [TestMethod]
@@ -81,6 +102,12 @@ public sealed class ProfileFileDecryptorTests
                 directory.Path,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
         var original =
             ProfileJson.PrettyPrint(
                 TestProfileFactory.CreateJson());
@@ -91,17 +118,15 @@ public sealed class ProfileFileDecryptorTests
 
         Assert.ThrowsExactly<InvalidDataException>(
             () => ProfileFileDecryptor.DecryptInPlace(
-                profilePath));
+                profilePath,
+                backupDirectory));
 
         CollectionAssert.AreEqual(
             original,
             File.ReadAllBytes(profilePath));
 
         Assert.IsFalse(
-            Directory.Exists(
-                Path.Combine(
-                    directory.Path,
-                    "backups")));
+            Directory.Exists(backupDirectory));
     }
 
     [TestMethod]
@@ -115,6 +140,12 @@ public sealed class ProfileFileDecryptorTests
                 directory.Path,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
         var original =
             Encoding.UTF8.GetBytes(
                 "not a DDV profile");
@@ -125,17 +156,15 @@ public sealed class ProfileFileDecryptorTests
 
         Assert.ThrowsExactly<InvalidDataException>(
             () => ProfileFileDecryptor.DecryptInPlace(
-                profilePath));
+                profilePath,
+                backupDirectory));
 
         CollectionAssert.AreEqual(
             original,
             File.ReadAllBytes(profilePath));
 
         Assert.IsFalse(
-            Directory.Exists(
-                Path.Combine(
-                    directory.Path,
-                    "backups")));
+            Directory.Exists(backupDirectory));
     }
 
     [TestMethod]
@@ -148,6 +177,12 @@ public sealed class ProfileFileDecryptorTests
             Path.Combine(
                 directory.Path,
                 "profile.json");
+
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
 
         var json =
             Encoding.UTF8.GetBytes(
@@ -163,17 +198,15 @@ public sealed class ProfileFileDecryptorTests
 
         Assert.ThrowsExactly<InvalidDataException>(
             () => ProfileFileDecryptor.DecryptInPlace(
-                profilePath));
+                profilePath,
+                backupDirectory));
 
         CollectionAssert.AreEqual(
             encrypted,
             File.ReadAllBytes(profilePath));
 
         Assert.IsFalse(
-            Directory.Exists(
-                Path.Combine(
-                    directory.Path,
-                    "backups")));
+            Directory.Exists(backupDirectory));
     }
 
     [TestMethod]
@@ -195,6 +228,12 @@ public sealed class ProfileFileDecryptorTests
                 saveDirectory,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "アプリ ケーション",
+                "backups");
+
         var encrypted =
             ProfileWriter.Encrypt(
                 TestProfileFactory.CreateJson())
@@ -206,7 +245,8 @@ public sealed class ProfileFileDecryptorTests
 
         var result =
             ProfileFileDecryptor.DecryptInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         Assert.AreEqual(
             Path.GetFullPath(profilePath),
@@ -220,5 +260,9 @@ public sealed class ProfileFileDecryptorTests
 
         Assert.IsTrue(
             File.Exists(result.Backup.Path));
+
+        Assert.AreEqual(
+            Path.GetFullPath(backupDirectory),
+            Path.GetDirectoryName(result.Backup.Path));
     }
 }

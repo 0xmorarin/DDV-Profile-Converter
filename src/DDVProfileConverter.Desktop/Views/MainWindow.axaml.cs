@@ -1,13 +1,20 @@
+using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using DDVProfileConverter.Core.Conversion;
+using DDVProfileConverter.Core.Profile;
 
 namespace DDVProfileConverter.Desktop.Views;
 
 public partial class MainWindow : Window
 {
+    private static readonly string BackupDirectory =
+        Path.Combine(
+            AppContext.BaseDirectory,
+            "backups");
+
     private bool _isBusy;
 
     public MainWindow()
@@ -127,93 +134,181 @@ public partial class MainWindow : Window
         }
 
         _isBusy = true;
-        ChooseFileButton.IsEnabled = false;
-        DetailsPanel.IsVisible = false;
-
-        StatusText.Text =
-            $"Processing {Path.GetFileName(path)}...";
+        ShowProcessing(path);
 
         try
         {
             var result =
                 await Task.Run(
                     () => ProfileFileConverter
-                        .ConvertInPlace(path));
+                        .ConvertInPlace(
+                            path,
+                            BackupDirectory));
 
             ShowSuccess(result);
         }
         catch (Exception exception)
         {
-            ShowError(
-                $"Conversion failed: {exception.Message}");
+            ShowError(exception.Message);
         }
         finally
         {
-            ChooseFileButton.IsEnabled = true;
             _isBusy = false;
         }
+    }
+
+    private void ShowProcessing(string path)
+    {
+        ProcessingFileText.Text =
+            $"Converting {Path.GetFileName(path)}";
+
+        ShowOnly(ProcessingPanel);
     }
 
     private void ShowSuccess(
         ProfileConversionResult result)
     {
-        StatusText.Text =
+        SuccessTitleText.Text =
             result.OutputFormat == ProfileFormat.PlainJson
-                ? "Decrypted successfully."
-                : "Encrypted successfully.";
+                ? "Decrypted successfully"
+                : "Encrypted successfully";
 
-        DirectionValue.Text =
-            result.OutputFormat == ProfileFormat.PlainJson
-                ? "Encrypted → readable JSON"
-                : "Readable JSON → encrypted";
+        var metadata = result.Metadata;
 
-        PlayerValue.Text =
-            string.IsNullOrWhiteSpace(
-                result.Metadata.PlayerName)
-                ? "—"
-                : result.Metadata.PlayerName;
+        PlayerNameValue.Text =
+            ValueOrDash(metadata.PlayerName);
 
-        VersionValue.Text =
-            result.Metadata.Version.ToString();
+        PlayerIdValue.Text =
+            FormatPlayerId(metadata.LastCustomIdOwner);
 
-        MdcValue.Text =
-            string.IsNullOrWhiteSpace(
-                result.Metadata.LastCustomIdOwner)
-                ? "—"
-                : $"mdc:{result.Metadata.LastCustomIdOwner}";
+        SaveVersionValue.Text =
+            metadata.Version.ToString(
+                CultureInfo.InvariantCulture);
 
-        ModifiedValue.Text =
-            string.IsNullOrWhiteSpace(
-                result.Metadata.Modified)
-                ? "—"
-                : result.Metadata.Modified;
+        PlayTimeValue.Text =
+            FormatPlayTime(metadata.TimePlayedInMinutes);
 
-        BackupValue.Text =
-            result.Backup is null
-                ? "Not created"
-                : FormatBackup(result);
+        CreatedValue.Text =
+            FormatTimestamp(metadata.Created);
 
-        DetailsPanel.IsVisible = true;
+        LastModifiedValue.Text =
+            FormatTimestamp(metadata.Modified);
+
+        LastSavedOnValue.Text =
+            FormatDevice(metadata.LastSaveDeviceType);
+
+        ShowOnly(SuccessPanel);
     }
 
-    private static string FormatBackup(
-        ProfileConversionResult result)
+    private void ShowError(string message)
     {
-        var backup =
-            result.Backup!;
+        ErrorMessageText.Text =
+            string.IsNullOrWhiteSpace(message)
+                ? "The selected file could not be converted."
+                : message;
 
-        var fileName =
-            Path.GetFileName(backup.Path);
-
-        return backup.Created
-            ? $"backups/{fileName}"
-            : $"backups/{fileName} (existing)";
+        ShowOnly(ErrorPanel);
     }
 
-    private void ShowError(
-        string message)
+    private void ShowOnly(Control panel)
     {
-        StatusText.Text = message;
-        DetailsPanel.IsVisible = false;
+        IdlePanel.IsVisible = ReferenceEquals(panel, IdlePanel);
+        ProcessingPanel.IsVisible = ReferenceEquals(panel, ProcessingPanel);
+        SuccessPanel.IsVisible = ReferenceEquals(panel, SuccessPanel);
+        ErrorPanel.IsVisible = ReferenceEquals(panel, ErrorPanel);
+    }
+
+    private static string ValueOrDash(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : value;
+    }
+
+    private static string FormatPlayerId(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : $"mdc:{value}";
+    }
+
+    private static string FormatPlayTime(long? minutes)
+    {
+        if (minutes is null)
+        {
+            return "—";
+        }
+
+        var hours = minutes.Value / 60;
+        var remainingMinutes = minutes.Value % 60;
+
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"{hours}h {remainingMinutes}m");
+    }
+
+    private static string FormatTimestamp(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "—";
+        }
+
+        if (value.Length >= 20 &&
+            value.EndsWith(
+                "Z",
+                StringComparison.Ordinal) &&
+            (value.Length == 20 || value[19] == '.') &&
+            DateTime.TryParseExact(
+                value[..19],
+                "yyyy-MM-dd'T'HH:mm:ss",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal |
+                DateTimeStyles.AdjustToUniversal,
+                out var utcTimestamp))
+        {
+            return utcTimestamp.ToString(
+                "yyyy-MM-dd HH:mm 'UTC'",
+                CultureInfo.InvariantCulture);
+        }
+
+        if (DateTimeOffset.TryParse(
+                value,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal |
+                DateTimeStyles.AdjustToUniversal,
+                out var timestamp))
+        {
+            return timestamp.ToString(
+                "yyyy-MM-dd HH:mm 'UTC'",
+                CultureInfo.InvariantCulture);
+        }
+
+        return value;
+    }
+
+    private static string FormatDevice(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "—";
+        }
+
+        const string prefix = "DeviceType_";
+
+        var displayName = value.StartsWith(
+                prefix,
+                StringComparison.Ordinal)
+            ? value[prefix.Length..]
+            : value;
+
+        if (displayName.Equals(
+                "Switch",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "Nintendo Switch";
+        }
+
+        return displayName.Replace('_', ' ');
     }
 }

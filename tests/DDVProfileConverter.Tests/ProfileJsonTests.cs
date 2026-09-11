@@ -18,11 +18,20 @@ public sealed class ProfileJsonTests
             "0123456789ABCDEF",
             metadata.LastCustomIdOwner);
         Assert.AreEqual(
+            "2025-10-14T23:31:58.070966900Z",
+            metadata.Created);
+        Assert.AreEqual(
             "2026-09-11T00:00:00.123456700Z",
             metadata.Modified);
         Assert.AreEqual(
             "TestPlayer",
             metadata.PlayerName);
+        Assert.AreEqual(
+            18867L,
+            metadata.TimePlayedInMinutes);
+        Assert.AreEqual(
+            "DeviceType_Windows",
+            metadata.LastSaveDeviceType);
     }
 
     [TestMethod]
@@ -40,6 +49,16 @@ public sealed class ProfileJsonTests
     {
         var json = Encoding.UTF8.GetBytes(
             "{\"GameInfo\":{\"Version\":\"608\"}}");
+
+        Assert.ThrowsExactly<InvalidDataException>(
+            () => ProfileJson.ReadMetadata(json));
+    }
+
+    [TestMethod]
+    public void ReadMetadataRejectsInvalidPlayTime()
+    {
+        var json = Encoding.UTF8.GetBytes(
+            "{\"GameInfo\":{\"Version\":608},\"Player\":{\"TimePlayedInMinutes\":-1}}");
 
         Assert.ThrowsExactly<InvalidDataException>(
             () => ProfileJson.ReadMetadata(json));

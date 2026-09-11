@@ -8,7 +8,7 @@ internal static class TestProfileFactory
 {
     private const string HexKey = "62357168683873614A38556C444A557A545A5864325467366D626F3857386e35";
 
-    public const string JsonText = "{\"GameInfo\":{\"Version\":608,\"LastCustomIdOwner\":\"0123456789ABCDEF\",\"Modified\":\"2026-09-11T00:00:00.123456700Z\"},\"Player\":{\"Name\":\"TestPlayer\"},\"Unknown\":{\"Value\":123}}";
+    public const string JsonText = "{\"GameInfo\":{\"Version\":608,\"LastCustomIdOwner\":\"0123456789ABCDEF\",\"Created\":\"2025-10-14T23:31:58.070966900Z\",\"Modified\":\"2026-09-11T00:00:00.123456700Z\",\"LastSaveDeviceInfo\":{\"deviceType\":\"DeviceType_Windows\"}},\"Player\":{\"Name\":\"TestPlayer\",\"TimePlayedInMinutes\":18867},\"Unknown\":{\"Value\":123}}";
 
     public static byte[] CreateJson()
     {

@@ -14,10 +14,11 @@ public sealed class ProfileBackupManagerTests
         using var directory =
             new TemporaryDirectory();
 
-        var sourcePath =
+        var backupDirectory =
             Path.Combine(
                 directory.Path,
-                "profile.json");
+                "application",
+                "backups");
 
         var original =
             Encoding.UTF8.GetBytes(
@@ -25,7 +26,7 @@ public sealed class ProfileBackupManagerTests
 
         var result =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 original,
                 CreateMetadata());
 
@@ -43,10 +44,11 @@ public sealed class ProfileBackupManagerTests
         using var directory =
             new TemporaryDirectory();
 
-        var sourcePath =
+        var backupDirectory =
             Path.Combine(
                 directory.Path,
-                "profile.json");
+                "application",
+                "backups");
 
         var original =
             Encoding.UTF8.GetBytes(
@@ -57,13 +59,13 @@ public sealed class ProfileBackupManagerTests
 
         var first =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 original,
                 metadata);
 
         var second =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 original,
                 metadata);
 
@@ -81,24 +83,25 @@ public sealed class ProfileBackupManagerTests
         using var directory =
             new TemporaryDirectory();
 
-        var sourcePath =
+        var backupDirectory =
             Path.Combine(
                 directory.Path,
-                "profile.json");
+                "application",
+                "backups");
 
         var metadata =
             CreateMetadata();
 
         var first =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 Encoding.UTF8.GetBytes(
                     "encrypted-a"),
                 metadata);
 
         var second =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 Encoding.UTF8.GetBytes(
                     "encrypted-b"),
                 metadata);
@@ -116,35 +119,26 @@ public sealed class ProfileBackupManagerTests
     }
 
     [TestMethod]
-    public void CreatePlacesBackupsBesideSourceDirectory()
+    public void CreateUsesSpecifiedBackupDirectory()
     {
         using var directory =
             new TemporaryDirectory();
 
-        var sourceDirectory =
+        var backupDirectory =
             Path.Combine(
                 directory.Path,
-                "save");
-
-        Directory.CreateDirectory(
-            sourceDirectory);
-
-        var sourcePath =
-            Path.Combine(
-                sourceDirectory,
-                "profile.json");
+                "converter",
+                "backups");
 
         var result =
             ProfileBackupManager.Create(
-                sourcePath,
+                backupDirectory,
                 Encoding.UTF8.GetBytes(
                     "encrypted-original"),
                 CreateMetadata());
 
         Assert.AreEqual(
-            Path.Combine(
-                sourceDirectory,
-                "backups"),
+            Path.GetFullPath(backupDirectory),
             Path.GetDirectoryName(result.Path));
     }
 
@@ -153,7 +147,10 @@ public sealed class ProfileBackupManagerTests
         return new ProfileMetadata(
             591,
             "3768951AEBEA42C5",
+            "2025-10-14T23:31:58.070966900Z",
             "2026-07-11T08:11:04.402572100Z",
-            "Morarin");
+            "Morarin",
+            17234,
+            "DeviceType_Windows");
     }
 }

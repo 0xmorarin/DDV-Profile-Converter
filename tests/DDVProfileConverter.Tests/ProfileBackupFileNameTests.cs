@@ -13,8 +13,11 @@ public sealed class ProfileBackupFileNameTests
         var metadata = new ProfileMetadata(
             591,
             "3768951AEBEA42C5",
+            null,
             "2026-07-11T08:11:04.402572100Z",
-            "Morarin");
+            "Morarin",
+            null,
+            null);
 
         var fileName =
             ProfileBackupFileName.Build(metadata);
@@ -30,8 +33,11 @@ public sealed class ProfileBackupFileNameTests
         var metadata = new ProfileMetadata(
             608,
             "3768951AEBEA42C5",
+            null,
             "2026-09-09T03:52:12Z",
-            "Morarin");
+            "Morarin",
+            null,
+            null);
 
         var fileName =
             ProfileBackupFileName.Build(metadata);
@@ -47,7 +53,10 @@ public sealed class ProfileBackupFileNameTests
         var metadata = new ProfileMetadata(
             608,
             null,
+            null,
             "2026-09-09T03:52:12.521318300Z",
+            null,
+            null,
             null);
 
         Assert.ThrowsExactly<InvalidDataException>(
@@ -60,7 +69,10 @@ public sealed class ProfileBackupFileNameTests
         var metadata = new ProfileMetadata(
             608,
             "3768951AEBEA42C5",
+            null,
             "not-a-date",
+            null,
+            null,
             null);
 
         Assert.ThrowsExactly<InvalidDataException>(

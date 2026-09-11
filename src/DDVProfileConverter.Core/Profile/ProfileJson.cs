@@ -87,14 +87,19 @@ public static class ProfileJson
         }
 
         var lastCustomIdOwner = ReadOptionalString(gameInfo, "LastCustomIdOwner");
+        var created = ReadOptionalString(gameInfo, "Created");
         var modified = ReadOptionalString(gameInfo, "Modified");
-        var playerName = ReadPlayerName(root);
+        var lastSaveDeviceType = ReadLastSaveDeviceType(gameInfo);
+        var (playerName, timePlayedInMinutes) = ReadPlayer(root);
 
         return new ProfileMetadata(
             version,
             lastCustomIdOwner,
+            created,
             modified,
-            playerName);
+            playerName,
+            timePlayedInMinutes,
+            lastSaveDeviceType);
     }
 
     private static string? ReadOptionalString(JsonElement parent, string propertyName)
@@ -117,11 +122,36 @@ public static class ProfileJson
         return element.GetString();
     }
 
-    private static string? ReadPlayerName(JsonElement root)
+    private static long? ReadOptionalNonNegativeInt64(
+        JsonElement parent,
+        string propertyName)
+    {
+        if (!parent.TryGetProperty(propertyName, out var element))
+        {
+            return null;
+        }
+
+        if (element.ValueKind == JsonValueKind.Null)
+        {
+            return null;
+        }
+
+        if (element.ValueKind != JsonValueKind.Number ||
+            !element.TryGetInt64(out var value) ||
+            value < 0)
+        {
+            throw new InvalidDataException($"{propertyName} is invalid.");
+        }
+
+        return value;
+    }
+
+    private static (string? Name, long? TimePlayedInMinutes) ReadPlayer(
+        JsonElement root)
     {
         if (!root.TryGetProperty("Player", out var player))
         {
-            return null;
+            return (null, null);
         }
 
         if (player.ValueKind != JsonValueKind.Object)
@@ -129,6 +159,24 @@ public static class ProfileJson
             throw new InvalidDataException("Player is invalid.");
         }
 
-        return ReadOptionalString(player, "Name");
+        return (
+            ReadOptionalString(player, "Name"),
+            ReadOptionalNonNegativeInt64(player, "TimePlayedInMinutes"));
+    }
+
+    private static string? ReadLastSaveDeviceType(JsonElement gameInfo)
+    {
+        if (!gameInfo.TryGetProperty("LastSaveDeviceInfo", out var deviceInfo) ||
+            deviceInfo.ValueKind == JsonValueKind.Null)
+        {
+            return null;
+        }
+
+        if (deviceInfo.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException("GameInfo.LastSaveDeviceInfo is invalid.");
+        }
+
+        return ReadOptionalString(deviceInfo, "deviceType");
     }
 }

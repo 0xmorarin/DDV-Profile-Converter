@@ -7,7 +7,8 @@ namespace DDVProfileConverter.Core.Conversion;
 public static class ProfileFileDecryptor
 {
     public static ProfileDecryptResult DecryptInPlace(
-        string profilePath)
+        string profilePath,
+        string backupDirectory)
     {
         if (string.IsNullOrWhiteSpace(profilePath))
         {
@@ -45,7 +46,7 @@ public static class ProfileFileDecryptor
 
         var backup =
             ProfileBackupManager.Create(
-                fullPath,
+                backupDirectory,
                 originalBytes,
                 readResult.Metadata);
 

@@ -5,18 +5,16 @@ namespace DDVProfileConverter.Core.Backup;
 
 public static class ProfileBackupManager
 {
-    private const string BackupDirectoryName = "backups";
-
     public static ProfileBackupResult Create(
-        string sourceProfilePath,
+        string backupDirectoryPath,
         ReadOnlySpan<byte> originalEncryptedBytes,
         ProfileMetadata metadata)
     {
-        if (string.IsNullOrWhiteSpace(sourceProfilePath))
+        if (string.IsNullOrWhiteSpace(backupDirectoryPath))
         {
             throw new ArgumentException(
-                "The source profile path is required.",
-                nameof(sourceProfilePath));
+                "The backup directory path is required.",
+                nameof(backupDirectoryPath));
         }
 
         if (originalEncryptedBytes.IsEmpty)
@@ -30,21 +28,8 @@ public static class ProfileBackupManager
         var canonicalFileName =
             ProfileBackupFileName.Build(metadata);
 
-        var sourceFullPath =
-            Path.GetFullPath(sourceProfilePath);
-
-        var sourceDirectory =
-            Path.GetDirectoryName(sourceFullPath);
-
-        if (string.IsNullOrEmpty(sourceDirectory))
-        {
-            throw new InvalidDataException(
-                "The source profile directory could not be determined.");
-        }
-
-        var backupDirectory = Path.Combine(
-            sourceDirectory,
-            BackupDirectoryName);
+        var backupDirectory =
+            Path.GetFullPath(backupDirectoryPath);
 
         Directory.CreateDirectory(backupDirectory);
 

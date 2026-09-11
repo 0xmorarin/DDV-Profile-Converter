@@ -2,90 +2,262 @@
     x:Class="DDVProfileConverter.Desktop.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Width="560"
-    Height="380"
-    MinWidth="460"
-    MinHeight="320"
+    Width="620"
+    Height="430"
+    MinWidth="560"
+    MinHeight="390"
+    Background="#08111D"
+    DragDrop.AllowDrop="True"
     Title="DDV Profile Converter"
-    DragDrop.AllowDrop="True">
-  <Grid Margin="24">
-    <Grid RowDefinitions="*,Auto,Auto">
+    WindowStartupLocation="CenterScreen">
+  <Window.Resources>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#0B1524" />
+    <SolidColorBrush x:Key="GoldBrush" Color="#E0B964" />
+    <SolidColorBrush x:Key="GoldBrightBrush" Color="#F0D184" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#F4F1E9" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#B8C0CF" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#2A3A50" />
+    <SolidColorBrush x:Key="ButtonBrush" Color="#101C2C" />
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="#18283D" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FF746B" />
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.Secondary">
+      <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.Label">
+      <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="TextBlock.Value">
+      <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="Button.RoyalButton">
+      <Setter Property="MinWidth" Value="150" />
+      <Setter Property="Padding" Value="20,9" />
+      <Setter Property="Background" Value="{StaticResource ButtonBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.RoyalButton:pointerover">
+      <Setter Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrightBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Border
+      Margin="8"
+      Padding="32"
+      Background="{StaticResource BackgroundBrush}"
+      BorderBrush="{StaticResource GoldBrush}"
+      BorderThickness="1"
+      CornerRadius="10">
+    <Grid>
       <StackPanel
-          Grid.Row="0"
+          x:Name="IdlePanel"
           HorizontalAlignment="Center"
           VerticalAlignment="Center"
-          Spacing="14">
+          Spacing="12">
         <TextBlock
             HorizontalAlignment="Center"
-            FontSize="22"
+            FontSize="32"
+            Foreground="{StaticResource GoldBrush}"
+            Text="✦" />
+        <TextBlock
+            HorizontalAlignment="Center"
+            FontSize="25"
             FontWeight="SemiBold"
-            Text="Drop profile.json here" />
-
+            Text="Drop profile.json" />
         <TextBlock
+            Classes="Secondary"
             HorizontalAlignment="Center"
-            Opacity="0.65"
+            FontSize="14"
             Text="or" />
-
         <Button
-            x:Name="ChooseFileButton"
-            Width="130"
+            Classes="RoyalButton"
             HorizontalAlignment="Center"
             Click="OnChooseFileClick"
             Content="Choose File" />
       </StackPanel>
 
-      <TextBlock
-          x:Name="StatusText"
-          Grid.Row="1"
-          Margin="0,0,0,8"
+      <StackPanel
+          x:Name="ProcessingPanel"
           HorizontalAlignment="Center"
-          IsVisible="Flase"
-          Opacity="0.8"
-          TextWrapping="Wrap" />
-
-      <Grid
-          x:Name="DetailsPanel"
-          Grid.Row="2"
-          ColumnDefinitions="90,*"
-          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-          IsVisible="False">
-        <TextBlock Grid.Row="0" Text="Result" />
+          VerticalAlignment="Center"
+          IsVisible="False"
+          Spacing="12">
         <TextBlock
-            x:Name="DirectionValue"
-            Grid.Row="0"
-            Grid.Column="1" />
-
-        <TextBlock Grid.Row="1" Text="Player" />
+            HorizontalAlignment="Center"
+            FontSize="32"
+            Foreground="{StaticResource GoldBrush}"
+            Text="✦" />
         <TextBlock
-            x:Name="PlayerValue"
-            Grid.Row="1"
-            Grid.Column="1" />
-
-        <TextBlock Grid.Row="2" Text="Version" />
+            HorizontalAlignment="Center"
+            FontSize="25"
+            FontWeight="SemiBold"
+            Text="Processing..." />
         <TextBlock
-            x:Name="VersionValue"
-            Grid.Row="2"
-            Grid.Column="1" />
-
-        <TextBlock Grid.Row="3" Text="MDC" />
+            x:Name="ProcessingFileText"
+            Classes="Secondary"
+            HorizontalAlignment="Center"
+            FontSize="14"
+            Text="Converting profile.json" />
+        <ProgressBar
+            Width="330"
+            Height="5"
+            Margin="0,8,0,4"
+            Background="{StaticResource DividerBrush}"
+            Foreground="{StaticResource GoldBrush}"
+            IsIndeterminate="True" />
         <TextBlock
-            x:Name="MdcValue"
-            Grid.Row="3"
-            Grid.Column="1" />
+            Classes="Secondary"
+            HorizontalAlignment="Center"
+            FontSize="13"
+            Text="Please wait." />
+      </StackPanel>
 
-        <TextBlock Grid.Row="4" Text="Modified" />
+      <StackPanel
+          x:Name="SuccessPanel"
+          Width="450"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          IsVisible="False"
+          Spacing="10">
         <TextBlock
-            x:Name="ModifiedValue"
-            Grid.Row="4"
-            Grid.Column="1" />
+            HorizontalAlignment="Center"
+            FontSize="28"
+            Foreground="{StaticResource GoldBrush}"
+            Text="✦" />
+        <TextBlock
+            x:Name="SuccessTitleText"
+            Margin="0,0,0,6"
+            HorizontalAlignment="Center"
+            FontSize="23"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource GoldBrightBrush}"
+            Text="Decrypted successfully" />
 
-        <TextBlock Grid.Row="5" Text="Backup" />
+        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
+          <TextBlock Classes="Label" Margin="0,3" Text="Player Name" />
+          <TextBlock
+              x:Name="PlayerNameValue"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3"
+              TextWrapping="Wrap" />
+
+          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Player ID" />
+          <TextBlock
+              x:Name="PlayerIdValue"
+              Grid.Row="1"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3"
+              TextWrapping="Wrap" />
+        </Grid>
+
+        <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
+          <TextBlock Classes="Label" Margin="0,3" Text="Save Version" />
+          <TextBlock
+              x:Name="SaveVersionValue"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3" />
+
+          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Play Time" />
+          <TextBlock
+              x:Name="PlayTimeValue"
+              Grid.Row="1"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3" />
+        </Grid>
+
+        <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+        <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
+          <TextBlock Classes="Label" Margin="0,3" Text="Created" />
+          <TextBlock
+              x:Name="CreatedValue"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3" />
+
+          <TextBlock Grid.Row="1" Classes="Label" Margin="0,3" Text="Last Modified" />
+          <TextBlock
+              x:Name="LastModifiedValue"
+              Grid.Row="1"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3" />
+
+          <TextBlock Grid.Row="2" Classes="Label" Margin="0,3" Text="Last Saved On" />
+          <TextBlock
+              x:Name="LastSavedOnValue"
+              Grid.Row="2"
+              Grid.Column="1"
+              Classes="Value"
+              Margin="0,3" />
+        </Grid>
+      </StackPanel>
+
+      <StackPanel
+          x:Name="ErrorPanel"
+          Width="430"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          IsVisible="False"
+          Spacing="14">
+        <Border
+            Width="42"
+            Height="42"
+            HorizontalAlignment="Center"
+            BorderBrush="{StaticResource ErrorBrush}"
+            BorderThickness="2"
+            CornerRadius="21">
+          <TextBlock
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              FontSize="25"
+              Foreground="{StaticResource ErrorBrush}"
+              Text="!" />
+        </Border>
         <TextBlock
-            x:Name="BackupValue"
-            Grid.Row="5"
-            Grid.Column="1"
+            HorizontalAlignment="Center"
+            FontSize="24"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource ErrorBrush}"
+            Text="Conversion failed" />
+        <TextBlock
+            x:Name="ErrorMessageText"
+            Classes="Secondary"
+            HorizontalAlignment="Center"
+            MaxWidth="400"
+            FontSize="14"
+            TextAlignment="Center"
             TextWrapping="Wrap" />
-      </Grid>
+        <Button
+            Classes="RoyalButton"
+            Margin="0,6,0,0"
+            HorizontalAlignment="Center"
+            Click="OnChooseFileClick"
+            Content="Choose File" />
+      </StackPanel>
     </Grid>
-  </Grid>
+  </Border>
 </Window>

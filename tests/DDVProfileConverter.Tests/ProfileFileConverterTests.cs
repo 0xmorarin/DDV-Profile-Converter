@@ -17,7 +17,17 @@ public sealed class ProfileFileConverterTests
         var profilePath =
             Path.Combine(
                 directory.Path,
+                "save",
                 "profile.json");
+
+        Directory.CreateDirectory(
+            Path.GetDirectoryName(profilePath)!);
+
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
 
         var encrypted =
             ProfileWriter.Encrypt(
@@ -30,7 +40,8 @@ public sealed class ProfileFileConverterTests
 
         var result =
             ProfileFileConverter.ConvertInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         Assert.AreEqual(
             ProfileFormat.Encrypted,
@@ -50,6 +61,16 @@ public sealed class ProfileFileConverterTests
         Assert.IsTrue(
             File.Exists(
                 result.Backup!.Path));
+
+        Assert.AreEqual(
+            Path.GetFullPath(backupDirectory),
+            Path.GetDirectoryName(result.Backup.Path));
+
+        Assert.IsFalse(
+            Directory.Exists(
+                Path.Combine(
+                    Path.GetDirectoryName(profilePath)!,
+                    "backups")));
 
         var output =
             ProfileReader.Read(
@@ -71,6 +92,12 @@ public sealed class ProfileFileConverterTests
                 directory.Path,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
         File.WriteAllBytes(
             profilePath,
             ProfileJson.PrettyPrint(
@@ -78,7 +105,8 @@ public sealed class ProfileFileConverterTests
 
         var result =
             ProfileFileConverter.ConvertInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         Assert.AreEqual(
             ProfileFormat.PlainJson,
@@ -104,10 +132,7 @@ public sealed class ProfileFileConverterTests
             output.Format);
 
         Assert.IsFalse(
-            Directory.Exists(
-                Path.Combine(
-                    directory.Path,
-                    "backups")));
+            Directory.Exists(backupDirectory));
     }
 
     [TestMethod]
@@ -121,6 +146,12 @@ public sealed class ProfileFileConverterTests
                 directory.Path,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
         var encrypted =
             ProfileWriter.Encrypt(
                 TestProfileFactory.CreateJson())
@@ -132,7 +163,8 @@ public sealed class ProfileFileConverterTests
 
         var first =
             ProfileFileConverter.ConvertInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         Assert.AreEqual(
             ProfileFormat.PlainJson,
@@ -140,7 +172,8 @@ public sealed class ProfileFileConverterTests
 
         var second =
             ProfileFileConverter.ConvertInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         Assert.AreEqual(
             ProfileFormat.Encrypted,
@@ -161,11 +194,6 @@ public sealed class ProfileFileConverterTests
             TestProfileFactory.CreateJson(),
             finalResult.JsonBytes);
 
-        var backupDirectory =
-            Path.Combine(
-                directory.Path,
-                "backups");
-
         Assert.AreEqual(
             1,
             Directory.GetFiles(
@@ -184,6 +212,12 @@ public sealed class ProfileFileConverterTests
                 directory.Path,
                 "profile.json");
 
+        var backupDirectory =
+            Path.Combine(
+                directory.Path,
+                "application",
+                "backups");
+
         var original =
             Encoding.UTF8.GetBytes(
                 "not a DDV profile");
@@ -194,16 +228,14 @@ public sealed class ProfileFileConverterTests
 
         Assert.ThrowsExactly<InvalidDataException>(
             () => ProfileFileConverter.ConvertInPlace(
-                profilePath));
+                profilePath,
+                backupDirectory));
 
         CollectionAssert.AreEqual(
             original,
             File.ReadAllBytes(profilePath));
 
         Assert.IsFalse(
-            Directory.Exists(
-                Path.Combine(
-                    directory.Path,
-                    "backups")));
+            Directory.Exists(backupDirectory));
     }
 }

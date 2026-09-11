@@ -3,7 +3,8 @@ namespace DDVProfileConverter.Core.Conversion;
 public static class ProfileFileConverter
 {
     public static ProfileConversionResult ConvertInPlace(
-        string profilePath)
+        string profilePath,
+        string backupDirectory)
     {
         if (string.IsNullOrWhiteSpace(profilePath))
         {
@@ -24,7 +25,9 @@ public static class ProfileFileConverter
         return readResult.Format switch
         {
             ProfileFormat.Encrypted =>
-                Decrypt(fullPath),
+                Decrypt(
+                    fullPath,
+                    backupDirectory),
 
             ProfileFormat.PlainJson =>
                 Encrypt(fullPath),
@@ -35,11 +38,13 @@ public static class ProfileFileConverter
     }
 
     private static ProfileConversionResult Decrypt(
-        string profilePath)
+        string profilePath,
+        string backupDirectory)
     {
         var result =
             ProfileFileDecryptor.DecryptInPlace(
-                profilePath);
+                profilePath,
+                backupDirectory);
 
         return new ProfileConversionResult(
             result.ProfilePath,
